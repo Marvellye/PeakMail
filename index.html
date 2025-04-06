@@ -168,7 +168,7 @@
       transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
       transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
       transition-duration: 150ms;
-      height: 2.2rem;
+      height: 2.5rem;
       padding-left: 1rem;
       padding-right: 1rem;
       box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -677,11 +677,7 @@
         function formatEmailBody(body) {
           if (!body) return '';
           
-          return body
-           // .replace(/\r\n/g, '<br>')
-           // .replace(/\n/g, '<br>')
-           // Highlight verification codes (common 6-digit numbers)
-           // .replace(/(\b\d{6}\b)/g, '<span class="verification-code">$1</span>');
+          return body;
         }
         
         // Copy email to clipboard
