@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peak Mail - Temporary Email Service</title>
+  <!-- Boxicons CDN -->
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="shortcut icon" href="https://marvelly.com.ng/storage/logo/logo-file-1722978272.png" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            border: "hsl(240 5.9% 90%)",
+            input: "hsl(240 5.9% 90%)",
+            ring: "hsl(240 5% 64.9%)",
+            background: "hsl(0 0% 100%)",
+            foreground: "hsl(240 10% 3.9%)",
+            primary: {
+              DEFAULT: "hsl(240 5.9% 10%)",
+              foreground: "hsl(0 0% 98%)"
+            },
+            secondary: {
+              DEFAULT: "hsl(240 4.8% 95.9%)",
+              foreground: "hsl(240 5.9% 10%)"
+            },
+            destructive: {
+              DEFAULT: "hsl(0 84.2% 60.2%)",
+              foreground: "hsl(0 0% 98%)"
+            },
+            muted: {
+              DEFAULT: "hsl(240 4.8% 95.9%)",
+              foreground: "hsl(240 3.8% 46.1%)"
+            },
+            accent: {
+              DEFAULT: "hsl(240 4.8% 95.9%)",
+              foreground: "hsl(240 5.9% 10%)"
+            },
+            popover: {
+              DEFAULT: "hsl(0 0% 100%)",
+              foreground: "hsl(240 10% 3.9%)"
+            },
+            card: {
+              DEFAULT: "hsl(0 0% 100%)",
+              foreground: "hsl(240 10% 3.9%)"
+            }
+          },
+          borderRadius: {
+            lg: "0.5rem",
+            md: "calc(0.5rem - 2px)",
+            sm: "calc(0.5rem - 4px)"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"]
+          },
+          boxShadow: {
+            'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+            'DEFAULT': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+            'md': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: hsl(240 4.8% 95.9%);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: hsl(240 5% 64.9%);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: hsl(240 5% 50%);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Email body styling */
+    .email-body {
+      color: hsl(240 10% 3.9%);
+    }
+
+    .verification-code {
+      background-color: hsl(240 4.8% 95.9%);
+      color: hsl(240 5.9% 10%);
+      padding: 0 0.25rem;
+      border-radius: 0.25rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    /* Toast animation */
+    .toast-enter-active, .toast-leave-active {
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .toast-enter-from, .toast-leave-to {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    /* Button styles */
+    .btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: 150ms;
+      height: 2.2rem;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid hsl(240 5% 64.9%);
+      outline-offset: 2px;
+    }
+
+    .btn:disabled {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .btn-primary {
+      background-color: hsl(240 5.9% 10%);
+      color: hsl(0 0% 98%);
+    }
+
+    .btn-primary:hover {
+      background-color: hsl(240 5.9% 15%);
+    }
+
+    .btn-secondary {
+      background-color: hsl(240 4.8% 95.9%);
+      color: hsl(240 5.9% 10%);
+    }
+
+    .btn-secondary:hover {
+      background-color: hsl(240 4.8% 90%);
+    }
+
+    .btn-ghost {
+      background-color: transparent;
+      color: hsl(240 5.9% 10%);
+    }
+
+    .btn-ghost:hover {
+      background-color: hsl(240 4.8% 95.9%);
+    }
+
+    /* Card styles */
+    .card {
+      border-radius: 0.75rem;
+      background-color: hsl(0 0% 100%);
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid hsl(240 5.9% 90%);
+    }
+
+    .card-content {
+      padding: 1.25rem;
+    }
+
+    /* Input styles */
+    .input {
+      display: flex;
+      height: 2.5rem;
+      width: 100%;
+      border-radius: 0.5rem;
+      border: 1px solid hsl(240 5.9% 90%);
+      background-color: transparent;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      color: hsl(240 10% 3.9%);
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: hsl(240 5% 64.9%);
+      box-shadow: 0 0 0 1px hsl(240 5% 64.9%);
+    }
+
+    /* Email list item hover effect */
+    .email-item {
+      transition: background-color 0.2s ease, border-left-width 0.2s ease;
+    }
+
+    .email-item:hover {
+      background-color: hsl(240 4.8% 97%);
+    }
+
+    .email-item.selected {
+      background-color: hsl(240 4.8% 96%);
+      border-left: 3px solid hsl(240 5.9% 10%);
+    }
+  </style>
+</head>
+<body class="bg-secondary min-h-screen flex flex-col text-foreground">
+  <div id="app" class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-background border-b border-border sticky top-0 z-10">
+      <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center">
+        <div class="flex items-center mb-4 sm:mb-0">
+          <i class="bx bx-envelope text-primary text-3xl mr-2"></i>
+          <h1 class="text-2xl font-bold text-primary">Peak Mail</h1>
+        </div>
+        <div class="flex items-center space-x-3">
+          <button 
+            @click="generateNewEmail()" 
+            class="btn btn-primary flex items-center"
+          >
+            <i class="bx bx-refresh mr-1.5"></i> New Email
+          </button>
+          <button 
+            @click="showCustomEmailModal = true" 
+            class="btn btn-secondary flex items-center"
+          >
+            <i class="bx bx-customize mr-1.5"></i> Custom Email
+          </button>
+          <a
+            href="https://marvelly.com.ng" target="_blank"
+            class="btn btn-ghost flex items-center"
+            style="border: 1px solid black;"
+          >
+            <i class="bx bx-code-alt mr-1.5"></i> Dev
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6 flex-grow">
+      <!-- Email Display -->
+      <div v-if="currentEmail" class="card mb-6">
+        <div class="p-4 sm:p-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between">
+            <div class="flex items-center mb-4 md:mb-0">
+              <div class="h-10 w-10 rounded-full bg-secondary flex items-center justify-center mr-3">
+                <i class="bx bx-user text-primary text-xl"></i>
+              </div>
+              <div>
+                <h2 class="text-lg font-medium text-foreground">Your Temporary Email</h2>
+                <p class="text-muted-foreground text-sm">Valid forever</p>
+              </div>
+            </div>
+            <div class="flex items-center w-full md:w-auto">
+              <div class="relative flex items-center bg-secondary rounded-md px-3 py-2 mr-2 w-full md:w-auto border border-border">
+                <span class="text-foreground text-sm truncate">{{ currentEmail }}</span>
+                <button 
+                  @click="copyToClipboard(currentEmail)" 
+                  class="ml-2 text-muted-foreground hover:text-foreground flex-shrink-0 transition-colors"
+                  :title="copied ? 'Copied!' : 'Copy to clipboard'"
+                >
+                  <i class="bx" :class="[copied ? 'bx-check' : 'bx-copy']"></i>
+                </button>
+              </div>
+              <button 
+                @click="refreshInbox" 
+                class="btn btn-secondary p-2 h-auto w-10 flex-shrink-0"
+                title="Refresh inbox"
+              >
+                <i class="bx bx-refresh"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email Interface -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Inbox List -->
+        <div class="lg:col-span-1 card">
+          <div class="flex items-center justify-between p-4 border-b border-border">
+            <h2 class="text-lg font-medium">Inbox</h2>
+            <div class="flex items-center">
+              <span v-if="emails.length > 0" class="bg-secondary text-foreground rounded-full px-2 py-0.5 text-xs mr-2">
+                {{ emails.length }}
+              </span>
+              <button 
+                @click="refreshInbox" 
+                class="text-muted-foreground hover:text-foreground transition-colors"
+                :class="{'animate-spin': loading}"
+              >
+                <i class="bx bx-refresh"></i>
+              </button>
+            </div>
+          </div>
+
+          <div v-if="loading && emails.length === 0" class="p-8 text-center">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-muted border-t-foreground"></div>
+            <p class="mt-2 text-muted-foreground text-sm">Loading your emails...</p>
+          </div>
+
+          <div v-else-if="emails.length === 0" class="p-8 text-center">
+            <div class="h-12 w-12 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+              <i class="bx bxs-inbox text-muted-foreground text-xl"></i>
+            </div>
+            <p class="text-foreground font-medium">Your inbox is empty</p>
+            <p class="text-sm text-muted-foreground mt-1">Emails will appear here once received</p>
+          </div>
+
+          <div v-else class="max-h-[500px] overflow-y-auto">
+            <div class="divide-y divide-border">
+              <div 
+                v-for="email in emails" 
+                :key="email.id" 
+                @click="selectEmail(email)"
+                class="px-4 py-3 cursor-pointer transition-colors email-item"
+                :class="{'selected': selectedEmail && selectedEmail.id === email.id}"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-foreground truncate">{{ formatSender(email.from) }}</p>
+                    <p class="text-sm text-foreground truncate">{{ email.subject }}</p>
+                    <p class="text-xs text-muted-foreground mt-1">{{ formatDate(email.date_unix) }}</p>
+                  </div>
+                  <div class="ml-2 flex-shrink-0 text-muted-foreground">
+                    <i class="bx bx-chevron-right"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email Detail -->
+        <div class="lg:col-span-2">
+          <div v-if="selectedEmail" class="card h-full flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-border">
+              <h2 class="text-lg font-medium truncate">{{ selectedEmail.subject }}</h2>
+              <div class="flex items-center space-x-2">
+                <button 
+                  @click="copyEmailContent" 
+                  class="text-muted-foreground hover:text-foreground transition-colors"
+                  title="Copy email content"
+                >
+                  <i class="bx bx-copy"></i>
+                </button>
+                <button 
+                  @click="selectedEmail = null" 
+                  class="text-muted-foreground hover:text-foreground transition-colors lg:hidden"
+                  title="Close"
+                >
+                  <i class="bx bx-x"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-4 sm:p-6 overflow-auto flex-grow">
+              <div class="mb-6">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4">
+                  <div class="mb-2 sm:mb-0">
+                    <p class="text-sm text-muted-foreground">From:</p>
+                    <p class="font-medium text-foreground">{{ selectedEmail.from }}</p>
+                  </div>
+                  <div class="sm:text-right">
+                    <p class="text-sm text-muted-foreground">Date:</p>
+                    <p class="text-sm text-foreground">{{ formatDate(selectedEmail.date_unix, true) }}</p>
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <p class="text-sm text-muted-foreground">To:</p>
+                  <p class="font-medium text-foreground">{{ selectedEmail.to }}</p>
+                </div>
+                <div class="mb-4">
+                  <p class="text-sm text-muted-foreground">Subject:</p>
+                  <p class="font-medium text-foreground">{{ selectedEmail.subject }}</p>
+                </div>
+              </div>
+              <div class="border-t border-border pt-4">
+                <div class="prose max-w-none text-foreground email-body" style="overflow-y: auto; max-height: 50vh" v-html="formatEmailBody(selectedEmail.body)"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div v-else class="card p-8 text-center h-full flex flex-col items-center justify-center">
+            <div class="h-16 w-16 rounded-full bg-secondary flex items-center justify-center mb-4">
+              <i class="bx bx-envelope-open text-muted-foreground text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-medium text-foreground mb-2">No email selected</h3>
+            <p class="text-muted-foreground max-w-md">Select an email from your inbox to view its contents here</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-primary-foreground py-6 mt-8">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="flex items-center mb-4 md:mb-0">
+            <i class="bx bx-envelope text-primary-foreground text-2xl mr-2"></i>
+            <span class="font-semibold">Peak Mail</span>
+          </div>
+          <div class="text-sm text-primary-foreground opacity-80">
+            Secure temporary email service. No registration required.
+          </div>
+          <div class="mt-4 md:mt-0 text-sm text-primary-foreground opacity-80">
+            &copy; 2025 Peak Mail. <a href="https://marvelly.com.ng" target="_blank" style="color: crimson">Marvelly</a> All rights reserved.
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Custom Email Modal -->
+    <div v-if="showCustomEmailModal" class="fixed inset-0 bg-foreground/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div class="bg-background rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-medium text-foreground">Create Custom Email</h3>
+          <button @click="showCustomEmailModal = false" class="text-muted-foreground hover:text-foreground transition-colors">
+            <i class="bx bx-x text-2xl"></i>
+          </button>
+        </div>
+        <div class="mb-6">
+          <label for="customEmail" class="block text-sm font-medium text-foreground mb-2">Custom Username</label>
+          <div class="flex items-center">
+            <input 
+              v-model="customEmailPrefix" 
+              type="text" 
+              id="customEmail" 
+              class="input rounded-r-none"
+              placeholder="yourname"
+              @keyup.enter="generateCustomEmail"
+            />
+            <span class="bg-secondary text-foreground px-3 py-2 border border-l-0 border-border rounded-r-md h-10 flex items-center">
+              @zico.name.ng
+            </span>
+          </div>
+          <p class="mt-1.5 text-xs text-muted-foreground">Choose a unique username for your temporary email address.</p>
+        </div>
+        <div class="flex justify-end">
+          <button 
+            @click="generateCustomEmail" 
+            class="btn btn-primary"
+            :disabled="!customEmailPrefix || customEmailPrefix.trim().length === 0"
+          >
+            Create Email
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <transition name="toast">
+      <div 
+        v-if="showToast" 
+        class="fixed top-4 right-4 bg-foreground text-background px-4 py-3 rounded-md shadow-lg flex items-center z-50"
+      >
+        <i class="bx bx-check text-green-400 mr-2"></i>
+        <span>{{ toastMessage }}</span>
+      </div>
+    </transition>
+  </div>
+
+  <!-- Vue.js CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  
+  <!-- Application Script -->
+  <script>
+    const { createApp, ref, onMounted, onUnmounted } = Vue;
+    
+    createApp({
+      setup() {
+        // Environment variables
+        const API_URL = 'https://api.marvelly.com.ng/v1/tempmail';
+        
+        // State
+        const currentEmail = ref('');
+        const emails = ref([]);
+        const selectedEmail = ref(null);
+        const loading = ref(false);
+        const copied = ref(false);
+        const showCustomEmailModal = ref(false);
+        const customEmailPrefix = ref('');
+        const showToast = ref(false);
+        const toastMessage = ref('');
+        
+        // Fetch a new random email
+        async function generateNewEmail() {
+          try {
+            loading.value = true;
+            const response = await fetch(`${API_URL}/new`);
+            const data = await response.json();
+            currentEmail.value = data.email;
+            emails.value = [];
+            selectedEmail.value = null;
+            displayToast('New email address generated');
+            refreshInbox();
+          } catch (error) {
+            console.error('Error generating new email:', error);
+            displayToast('Failed to generate new email', true);
+          } finally {
+            loading.value = false;
+          }
+        }
+        
+        // Generate a custom email
+        async function generateCustomEmail() {
+          if (!customEmailPrefix.value || customEmailPrefix.value.trim().length === 0) return;
+          
+          try {
+            loading.value = true;
+            const response = await fetch(`${API_URL}/new?custom=${customEmailPrefix.value.trim()}`);
+            const data = await response.json();
+            currentEmail.value = data.email;
+            emails.value = [];
+            selectedEmail.value = null;
+            showCustomEmailModal.value = false;
+            customEmailPrefix.value = '';
+            displayToast('Custom email address created');
+            refreshInbox();
+          } catch (error) {
+            console.error('Error generating custom email:', error);
+            displayToast('Failed to create custom email', true);
+          } finally {
+            loading.value = false;
+          }
+        }
+        
+        // Fetch emails for the current email address
+        async function refreshInbox() {
+          if (!currentEmail.value) return;
+          
+          try {
+            loading.value = true;
+            const response = await fetch(`${API_URL}/inbox/${currentEmail.value}`);
+            const data = await response.json();
+            
+            // Sort emails by date (newest first)
+            emails.value = Array.isArray(data) ? data.sort((a, b) => b.date_unix - a.date_unix) : [];
+            
+            // If we had a selected email, update it with fresh data
+            if (selectedEmail.value) {
+              const updatedEmail = emails.value.find(e => e.id === selectedEmail.value.id);
+              if (updatedEmail) {
+                selectedEmail.value = updatedEmail;
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching emails:', error);
+            displayToast('Failed to refresh inbox', true);
+          } finally {
+            loading.value = false;
+          }
+        }
+        
+        // Select an email to view details
+        function selectEmail(email) {
+          selectedEmail.value = email;
+        }
+        
+        // Format date from unix timestamp
+        function formatDate(timestamp, detailed = false) {
+          if (!timestamp) return 'Unknown date';
+          
+          const date = new Date(timestamp * 1000);
+          const now = new Date();
+          const diffMs = now - date;
+          const diffMins = Math.floor(diffMs / 60000);
+          const diffHours = Math.floor(diffMins / 60);
+          const diffDays = Math.floor(diffHours / 24);
+          
+          // For recent emails, show relative time
+          if (!detailed && diffMins < 60) {
+            return diffMins <= 1 ? 'Just now' : `${diffMins} mins ago`;
+          } else if (!detailed && diffHours < 24) {
+            return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
+          } else if (!detailed && diffDays < 7) {
+            return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+          }
+          
+          // Otherwise show formatted date
+          const options = detailed 
+            ? { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric', 
+                hour: 'numeric', 
+                minute: 'numeric', 
+                second: 'numeric',
+                hour12: true 
+              }
+            : { 
+                month: 'short', 
+                day: 'numeric', 
+                hour: 'numeric', 
+                minute: 'numeric', 
+                hour12: true 
+              };
+          
+          return date.toLocaleString('en-US', options);
+        }
+        
+        // Format sender name
+        function formatSender(from) {
+          if (!from) return 'Unknown sender';
+          
+          // Extract name from "Name <email@mail.com>" format
+          const match = from.match(/(.*?)\s*<.*>/);
+          if (match && match[1]) {
+            return match[1].trim();
+          }
+          
+          return from;
+        }
+        
+        // Format email body with line breaks and basic styling
+        function formatEmailBody(body) {
+          if (!body) return '';
+          
+          return body
+           // .replace(/\r\n/g, '<br>')
+           // .replace(/\n/g, '<br>')
+           // Highlight verification codes (common 6-digit numbers)
+           // .replace(/(\b\d{6}\b)/g, '<span class="verification-code">$1</span>');
+        }
+        
+        // Copy email to clipboard
+        function copyToClipboard(text) {
+          navigator.clipboard.writeText(text);
+          copied.value = true;
+          displayToast('Email address copied to clipboard');
+          setTimeout(() => {
+            copied.value = false;
+          }, 2000);
+        }
+        
+        // Copy email content to clipboard
+        function copyEmailContent() {
+          if (!selectedEmail.value) return;
+          
+          const content = `From: ${selectedEmail.value.from}
+To: ${selectedEmail.value.to}
+Subject: ${selectedEmail.value.subject}
+Date: ${formatDate(selectedEmail.value.date_unix, true)}
+
+${selectedEmail.value.body}`;
+
+          navigator.clipboard.writeText(content);
+          displayToast('Email content copied to clipboard');
+        }
+        
+        // Show toast notification
+        function displayToast(message, isError = false) {
+          toastMessage.value = message;
+          showToast.value = true;
+          
+          setTimeout(() => {
+            showToast.value = false;
+          }, 3000);
+        }
+        
+        // Auto-refresh inbox periodically
+        let refreshInterval = null;
+        
+        onMounted(() => {
+          // Actual API URL from environment variable
+          const apiUrlElement = API_URL;
+          if (apiUrlElement && apiUrlElement.dataset.url) {
+            API_URL = apiUrlElement.dataset.url;
+          }
+          
+          generateNewEmail();
+          
+          // Set up auto-refresh every 30 seconds
+          refreshInterval = setInterval(() => {
+            if (currentEmail.value) {
+              refreshInbox();
+            }
+          }, 3000);
+        });
+        
+        onUnmounted(() => {
+          if (refreshInterval) {
+            clearInterval(refreshInterval);
+          }
+        });
+        
+        return {
+          currentEmail,
+          emails,
+          selectedEmail,
+          loading,
+          copied,
+          showCustomEmailModal,
+          customEmailPrefix,
+          showToast,
+          toastMessage,
+          generateNewEmail,
+          generateCustomEmail,
+          refreshInbox,
+          selectEmail,
+          formatDate,
+          formatSender,
+          formatEmailBody,
+          copyToClipboard,
+          copyEmailContent,
+          displayToast
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
