@@ -569,7 +569,10 @@
           
           try {
             loading.value = true;
-            const response = await fetch(`${API_URL}/new?custom=${customEmailPrefix.value.trim()}`);
+            // Convert to lowercase and replace spaces with dots
+            const formattedPrefix = customEmailPrefix.value.trim().toLowerCase().replace(/\s+/g, '.');
+            
+            const response = await fetch(`${API_URL}/new?custom=${formattedPrefix}`);
             const data = await response.json();
             currentEmail.value = data.email;
             emails.value = [];
